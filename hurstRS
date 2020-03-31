@@ -1,0 +1,55 @@
+clc;clear
+%------------------Parameter setting------------------------
+data_path='F:\data.xlsx';%Data file path
+result_path='F:\';%Result storage path
+
+%------------------Start calculation------------------------
+[data,txt]=xlsread('F:\data.xlsx');%Read data
+%Determine the number and data of indicators
+if size(data,2)==size(txt,2)
+    data=data(:,2:end);
+end
+txt=txt(1,:);
+xNum=size(txt,2)-1;%Determine the number of indicators
+%Calculate Hurst index one by one
+for i=1:xNum
+    disp(cat(2,txt{i+1},'In calculation......'))
+    [hurst,v,lnn,lnRs] = hurstRs(data(:,i));
+    H{1,i}=txt{i+1};
+    H{2,i}=hurst;
+    V(:,1)=lnn;
+    V(:,i+1)=v;
+    LNRS(:,1)=lnn;
+    LNRS(:,i+1)=lnRs;
+end
+
+%Sorting out ln (R / S) data
+txt{1}='ln(n)';
+V=[txt;num2cell(V)];
+LNRS=[txt;num2cell(LNRS)];
+
+%Extract data file name
+data_path_split= regexp(data_path, '\', 'split');
+file_name=regexp(data_path_split{end}, '.xlsx', 'split');
+
+%Write to excel
+xlswrite(cat(2,result_path,'\',file_name{1},'R/S calculation results.xlsx'),H,'H')%Write Hurst index into Excel's' H 'table
+xlswrite(cat(2,result_path,'\',file_name{1},'R/S calculation results.xlsx'),V,'V statistic')%Write V statistics data into Excel's' V statistics' table
+xlswrite(cat(2,result_path,'\',file_name{1},'R/S calculation results.xlsx'),LNRS,'LNRS')%Write ln (R / s) data to Excel's' lnrs' table
+
+disp('Finish!(Ignore warning)')
+
+% ln_n=xlsread('F:/results.xlsx','A2:A1248');
+% P2P=xlsread('F:/calculation results.xlsx','B2:B1248');
+% stock=xlsread('F:/results.xlsx','C2:C1248');
+%   
+% subplot(1,2,1);
+% plot(ln_n,P2P)
+%     ylabel('ln£¨R/S£©')
+%   xlabel('ln(n)')
+%   title('P2P lending market')
+%   subplot(1,2,2);
+%   plot(ln_n,stock)
+%     ylabel('ln(R/S)')
+%   xlabel('ln(n)')
+%   title('Stock market')
